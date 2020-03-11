@@ -5,7 +5,10 @@
     <e p="$USER_HOME$/.cache/JetBrains/Rider2020.1/resharper-host/local/Transient/ReSharperHost/v201/SolutionCaches/_SagaPostgres.60647162.00" t="ExcludeRecursive" />
     <e p="$PROJECT_DIR$" t="IncludeFlat">
       <e p="SagaPostgres" t="IncludeRecursive">
-        <e p="DataAccess" t="Include" />
+        <e p="DataAccess" t="Include">
+          <e p="ServeBeerStateDbContext.cs" t="Include" />
+          <e p="ServeBeerStateMap.cs" t="Include" />
+        </e>
         <e p="Messages" t="Include">
           <e p="OrderBeer.cs" t="Include" />
           <e p="PayForBeer.cs" t="Include" />

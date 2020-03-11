@@ -91,8 +91,30 @@ namespace SagaPostgres
 
         private async Task OrderBeServedPay()
         {
-            await Task.Delay(1000);
-        }
+            var orderId = Guid.NewGuid();
+
+            await _publishEndpoint.Publish<OrderBeer>(new
+            {
+                OrderId = orderId,
+                BeerType = "Victoria Bitter",
+            });
+
+            await Task.Delay(500);
+
+            await _publishEndpoint.Publish<ServeBeer>(new
+            {
+                OrderId = orderId
+            });
+            
+            await Task.Delay(500);
+
+            await _publishEndpoint.Publish<PayForBeer>(new
+            {
+                OrderId = orderId,
+                Tip = GenerateTip()
+            });
+
+            await Task.Delay(1000);        }
 
         private static decimal GenerateTip()
         {
