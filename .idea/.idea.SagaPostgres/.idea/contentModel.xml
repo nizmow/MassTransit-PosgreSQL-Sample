@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="$USER_HOME$/.cache/JetBrains/Rider2020.1/extResources" t="IncludeRecursive" />
+    <e p="$USER_HOME$/.cache/JetBrains/Rider2020.1/resharper-host/local/Transient/ReSharperHost/v201/SolutionCaches/_SagaPostgres.60647162.00" t="ExcludeRecursive" />
+    <e p="$PROJECT_DIR$" t="IncludeFlat">
+      <e p="SagaPostgres" t="IncludeRecursive">
+        <e p="DataAccess" t="Include" />
+        <e p="Messages" t="Include">
+          <e p="OrderBeer.cs" t="Include" />
+          <e p="PayForBeer.cs" t="Include" />
+          <e p="ServeBeer.cs" t="Include" />
+        </e>
+        <e p="Program.cs" t="Include" />
+        <e p="SagaPostgres.csproj" t="IncludeRecursive" />
+        <e p="SagaPostgresHostedService.cs" t="Include" />
+        <e p="ServeBeerState.cs" t="Include" />
+        <e p="ServeBeerStateMachine.cs" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp3.1" t="Include">
+              <e p="SagaPostgres.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+      </e>
+      <e p="SagaPostgres.sln" t="IncludeFlat" />
+      <e p="packages" t="ExcludeRecursive" />
+    </e>
+  </component>
+</project>
