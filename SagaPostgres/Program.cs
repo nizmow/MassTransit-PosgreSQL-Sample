@@ -36,8 +36,14 @@ namespace SagaPostgres
         {
             containerBuilder.AddMassTransit(cfg =>
             {
-                cfg.AddInMemoryBus((_, __) => { });
+                cfg.AddSagaStateMachine<ServeBeerStateMachine, ServeBeerState>().InMemoryRepository();
+                cfg.AddInMemoryBus((context, busConfig) =>
+                {
+                    busConfig.ConfigureEndpoints(context);
+                });
             });
+
+            containerBuilder.RegisterType<UserInterface>();
         }
     }
 }

@@ -10,7 +10,7 @@ namespace SagaPostgres
         // using OrderId to correlated events just for example's sake.
         public Guid OrderId { get; set; }
         
-        public string State { get; set; }
+        public string CurrentState { get; set; }
         
         public string BeerType { get; set; }
         

@@ -1,3 +1,4 @@
+using System;
 using Automatonymous;
 using MassTransit;
 using SagaPostgres.Messages;
@@ -8,30 +9,43 @@ namespace SagaPostgres
     {
         public ServeBeerStateMachine()
         {
-            Event(() => Order, x => x
-                .CorrelateById(context => context.Message.OrderId)
+            InstanceState(x => x.CurrentState);
+            
+            Event(() => Order, cfg => cfg
+                .CorrelateBy((instance, context) => context.Message.OrderId == instance.OrderId)
                 .SelectId(x => NewId.NextGuid()));
-            Event(() => Pay, x => x
-                .CorrelateById(context => context.Message.OrderId)
-                .SelectId(x => NewId.NextGuid()));
-            Event(() => Serve, x => x
-                .CorrelateById(context => context.Message.OrderId)
-                .SelectId(x => NewId.NextGuid()));
+            Event(() => Pay, cfg => cfg
+                .CorrelateBy((instance, context) => context.Message.OrderId == instance.OrderId)
+                .OnMissingInstance(x => x.Fault()));
+            Event(() => Serve, cfg => cfg
+                .CorrelateBy((instance, context) => context.Message.OrderId == instance.OrderId)
+                .OnMissingInstance(x => x.Fault()));
 
             Initially(
                 When(Order)
+                    .Then(context =>
+                    {
+                        context.Instance.OrderId = context.Data.OrderId;
+                        context.Instance.BeerType = context.Data.BeerType;
+                    })
+                    .Then(_ => Console.WriteLine("<Initial> => Ordered"))
                     .TransitionTo(Ordered));
             
             During(Ordered,
                 When(Pay)
+                    .Then(_ => Console.WriteLine("Ordered => Paid"))
                     .TransitionTo(Paid),
                 When(Serve)
+                    .Then(_ => Console.WriteLine("Ordered => Served"))
                     .TransitionTo(Served));
             
             CompositeEvent(() => PaidAndServed, x => x.PaidAndServedStatus, Serve, Pay);
 
             DuringAny(
+                When(Pay)
+                    .Then(context => context.Instance.Tip = context.Data.Tip),
                 When(PaidAndServed)
+                    .Then(_ => Console.WriteLine("PaidAndServed => <Finalize>"))
                     .Finalize());
         }
         
