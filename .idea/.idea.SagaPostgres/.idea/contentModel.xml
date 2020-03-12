@@ -20,6 +20,7 @@
         <e p="ServeBeerState.cs" t="Include" />
         <e p="ServeBeerStateMachine.cs" t="Include" />
         <e p="UserInterface.cs" t="Include" />
+        <e p="appsettings.json" t="Include" />
         <e p="bin" t="ExcludeRecursive" />
         <e p="obj" t="ExcludeRecursive">
           <e p="Debug" t="Include">
