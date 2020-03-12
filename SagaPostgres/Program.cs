@@ -1,7 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using MassTransit;
+using MassTransit.EntityFrameworkCoreIntegration.Saga;
+using MassTransit.Saga;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,13 +46,21 @@ namespace SagaPostgres
             {
                 builder.UseNpgsql(context.Configuration.GetConnectionString("local"));
             });
+            services.AddScoped<DbContext>(p => p.GetService<ServeBeerStateDbContext>());
         }
 
         private static void ConfigureContainer(ContainerBuilder containerBuilder)
         {
+            containerBuilder.RegisterType<ServeBeerStateDbContextFactory>().SingleInstance();
+            containerBuilder.Register(context =>
+                    EntityFrameworkSagaRepository<ServeBeerState>.CreatePessimistic(
+                        context.Resolve<ServeBeerStateDbContextFactory>()))
+                .SingleInstance()
+                .As<ISagaRepository<ServeBeerState>>();
+            
             containerBuilder.AddMassTransit(cfg =>
             {
-                cfg.AddSagaStateMachine<ServeBeerStateMachine, ServeBeerState>().InMemoryRepository();
+                cfg.AddSagaStateMachine<ServeBeerStateMachine, ServeBeerState>();
                 cfg.AddInMemoryBus((context, busConfig) =>
                 {
                     busConfig.ConfigureEndpoints(context);

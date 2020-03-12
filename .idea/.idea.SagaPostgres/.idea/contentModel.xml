@@ -7,6 +7,7 @@
       <e p="SagaPostgres" t="IncludeRecursive">
         <e p="DataAccess" t="Include">
           <e p="ServeBeerStateDbContext.cs" t="Include" />
+          <e p="ServeBeerStateDbContextFactory.cs" t="Include" />
           <e p="ServeBeerStateMap.cs" t="Include" />
         </e>
         <e p="Messages" t="Include">
