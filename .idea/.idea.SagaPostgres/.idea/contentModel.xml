@@ -14,6 +14,11 @@
           <e p="PayForBeer.cs" t="Include" />
           <e p="ServeBeer.cs" t="Include" />
         </e>
+        <e p="Migrations" t="Include">
+          <e p="20200312124154_Initial.Designer.cs" t="Include" />
+          <e p="20200312124154_Initial.cs" t="Include" />
+          <e p="ServeBeerStateDbContextModelSnapshot.cs" t="Include" />
+        </e>
         <e p="Program.cs" t="Include" />
         <e p="SagaPostgres.csproj" t="IncludeRecursive" />
         <e p="SagaPostgresHostedService.cs" t="Include" />
