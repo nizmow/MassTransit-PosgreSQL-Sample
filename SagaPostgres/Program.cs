@@ -43,6 +43,10 @@ namespace SagaPostgres
         private static void ConfigureServices(HostBuilderContext hostBuilderContext, IServiceCollection services)
         {
             services.AddHostedService<SagaPostgresHostedService>();
+            services.AddDbContext<ServeBeerStateDbContext>(db =>
+            {
+                db.UseNpgsql(hostBuilderContext.Configuration.GetConnectionString("local"));
+            });
         }
 
         private static void ConfigureContainer(HostBuilderContext hostBuilderContext, ContainerBuilder containerBuilder)
@@ -53,10 +57,13 @@ namespace SagaPostgres
                 {
                     r.LockStatementProvider = new PostgresLockStatementProvider();
                     r.ConcurrencyMode = ConcurrencyMode.Pessimistic;
-                    r.AddDbContext<DbContext, ServeBeerStateDbContext>((provider, builder) =>
-                    {
-                        builder.UseNpgsql(hostBuilderContext.Configuration.GetConnectionString("local"));
-                    });
+                    r.DatabaseFactory(provider => provider.GetService<ServeBeerStateDbContext>);
+                    
+                    // use database factory to replicate the issue.
+                    // r.AddDbContext<DbContext, ServeBeerStateDbContext>((provider, builder) =>
+                    // {
+                    //     builder.UseNpgsql(hostBuilderContext.Configuration.GetConnectionString("local"));
+                    // });
                 });
                 cfg.AddInMemoryBus((context, busConfig) =>
                 {
