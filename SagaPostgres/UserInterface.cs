@@ -15,6 +15,8 @@ namespace SagaPostgres
     /// </summary>
     public class UserInterface
     {
+        const int WaitTimeInMs = 2000;
+
         private readonly IPublishEndpoint _publishEndpoint;
         private readonly IHostApplicationLifetime _hostApplicationLifetime;
 
@@ -39,6 +41,7 @@ namespace SagaPostgres
                 Console.WriteLine("Choose an option!");
                 Console.WriteLine("1. Order, pay and be served");
                 Console.WriteLine("2. Order, be served, and pay");
+                Console.WriteLine("3. Order, pay and be served MULTIPLE THREADS!");
                 Console.WriteLine("0. Quit");
                 //Console.WriteLine("3. Dupe orders, be served, and pay (to cause contention)");
                 var choice = Console.ReadKey();
@@ -49,6 +52,9 @@ namespace SagaPostgres
                         break;
                     case ConsoleKey.D2:
                         await OrderBeServedPay();
+                        break;
+                    case ConsoleKey.D3:
+                        await OrderPayBeServedThreads();
                         break;
                     case ConsoleKey.D0:
                         _hostApplicationLifetime.StopApplication();
@@ -71,7 +77,7 @@ namespace SagaPostgres
                 BeerType = "Victoria Bitter",
             });
 
-            await Task.Delay(500);
+            await Task.Delay(WaitTimeInMs);
 
             await _publishEndpoint.Publish<PayForBeer>(new
             {
@@ -79,14 +85,57 @@ namespace SagaPostgres
                 Tip = GenerateTip()
             });
 
-            await Task.Delay(500);
+            await Task.Delay(WaitTimeInMs);
 
             await _publishEndpoint.Publish<ServeBeer>(new
             {
                 OrderId = orderId
             });
 
-            await Task.Delay(1000);
+            await Task.Delay(WaitTimeInMs);
+        }
+
+        private async Task OrderPayBeServedThreads()
+        {
+            var orderId = Guid.NewGuid();
+            var orderId2 = Guid.NewGuid();
+
+            await _publishEndpoint.Publish<OrderBeer>(new
+            {
+                OrderId = orderId,
+                BeerType = "Victoria Bitter",
+            });
+            await _publishEndpoint.Publish<OrderBeer>(new
+            {
+                OrderId = orderId2,
+                BeerType = "Carlton Draught",
+            });
+
+            await Task.Delay(WaitTimeInMs);
+
+            await _publishEndpoint.Publish<PayForBeer>(new
+            {
+                OrderId = orderId,
+                Tip = GenerateTip()
+            });
+            await _publishEndpoint.Publish<PayForBeer>(new
+            {
+                OrderId = orderId2,
+                Tip = GenerateTip()
+            });
+
+            await Task.Delay(WaitTimeInMs);
+
+            await _publishEndpoint.Publish<ServeBeer>(new
+            {
+                OrderId = orderId
+            });
+            await _publishEndpoint.Publish<ServeBeer>(new
+            {
+                OrderId = orderId2
+            });
+
+            await Task.Delay(WaitTimeInMs);
         }
 
         private async Task OrderBeServedPay()

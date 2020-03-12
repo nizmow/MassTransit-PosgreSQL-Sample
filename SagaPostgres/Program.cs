@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using MassTransit;
+using MassTransit.EntityFrameworkCoreIntegration;
 using MassTransit.EntityFrameworkCoreIntegration.Saga;
 using MassTransit.Saga;
 using Microsoft.EntityFrameworkCore;
@@ -39,28 +40,24 @@ namespace SagaPostgres
             logging.SetMinimumLevel(LogLevel.Debug);
         }
 
-        private static void ConfigureServices(HostBuilderContext context, IServiceCollection services)
+        private static void ConfigureServices(HostBuilderContext hostBuilderContext, IServiceCollection services)
         {
             services.AddHostedService<SagaPostgresHostedService>();
-            services.AddDbContext<ServeBeerStateDbContext>(builder =>
-            {
-                builder.UseNpgsql(context.Configuration.GetConnectionString("local"));
-            });
-            services.AddScoped<DbContext>(p => p.GetService<ServeBeerStateDbContext>());
         }
 
-        private static void ConfigureContainer(ContainerBuilder containerBuilder)
+        private static void ConfigureContainer(HostBuilderContext hostBuilderContext, ContainerBuilder containerBuilder)
         {
-            containerBuilder.RegisterType<ServeBeerStateDbContextFactory>().SingleInstance();
-            containerBuilder.Register(context =>
-                    EntityFrameworkSagaRepository<ServeBeerState>.CreatePessimistic(
-                        context.Resolve<ServeBeerStateDbContextFactory>()))
-                .SingleInstance()
-                .As<ISagaRepository<ServeBeerState>>();
-            
             containerBuilder.AddMassTransit(cfg =>
             {
-                cfg.AddSagaStateMachine<ServeBeerStateMachine, ServeBeerState>();
+                cfg.AddSagaStateMachine<ServeBeerStateMachine, ServeBeerState>().EntityFrameworkRepository(r =>
+                {
+                    r.LockStatementProvider = new PostgresLockStatementProvider();
+                    r.ConcurrencyMode = ConcurrencyMode.Pessimistic;
+                    r.AddDbContext<DbContext, ServeBeerStateDbContext>((provider, builder) =>
+                    {
+                        builder.UseNpgsql(hostBuilderContext.Configuration.GetConnectionString("local"));
+                    });
+                });
                 cfg.AddInMemoryBus((context, busConfig) =>
                 {
                     busConfig.ConfigureEndpoints(context);
